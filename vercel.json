@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "installCommand": "npm install || true",
+  "outputDirectory": "public",
   "framework": null,
   "rewrites": [
     { "source": "/analyze", "destination": "/api/analyze" }

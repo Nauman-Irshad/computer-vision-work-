@@ -1,3 +1,10 @@
 const fs = require('fs');
-fs.copyFileSync('templates/index.html', 'index.html');
-console.log('Built: templates/index.html -> index.html');
+const path = require('path');
+
+const outDir = path.join(__dirname, 'public');
+fs.mkdirSync(outDir, { recursive: true });
+fs.copyFileSync(
+  path.join(__dirname, 'templates', 'index.html'),
+  path.join(outDir, 'index.html')
+);
+console.log('Built: public/index.html');

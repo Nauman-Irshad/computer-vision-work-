@@ -11,8 +11,8 @@ After deploy, open your Vercel URL in **Chrome/Edge** and allow camera.
 1. Push this repo to GitHub: [Nauman-Irshad/computer-vision-work-](https://github.com/Nauman-Irshad/computer-vision-work-)
 2. Go to [vercel.com/new](https://vercel.com/new) → Import the repo
 3. **Framework preset:** Other (no framework)
-4. **Build command:** `npm run build` (syncs `templates/index.html` → `index.html`)
-5. **Output directory:** `.` (root)
+4. **Build command:** `npm run build` (creates `public/index.html`)
+5. **Output directory:** `public`
 6. Deploy
 
 Or CLI:
@@ -56,12 +56,13 @@ Open http://127.0.0.1:5000/
 ## Repo layout
 
 ```
-index.html          ← Vercel entry (copy of templates/index.html)
-templates/index.html ← Flask local + source of truth
+public/index.html   ← Vercel output (built from templates/index.html)
+templates/index.html ← Source + Flask local
 api/analyze.js      ← Vercel serverless verify
 app.py              ← Local Flask server only
 vercel.json
 package.json
+build.cjs           ← npm run build → public/
 ```
 
-After editing UI, run `npm run build` or copy `templates/index.html` to `index.html` before deploy.
+After editing UI, run `npm run build` (updates `public/index.html`) before deploy.
