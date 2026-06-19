@@ -1173,19 +1173,19 @@
         <div id="mobile-view">
             <!-- Pre-Start Screen for mobile so browser allows camera access on click -->
             <div id="pre-camera-screen" style="display:flex;">
-                <a id="website-back-link" href="/" style="display:none;position:absolute;top:16px;left:16px;z-index:200;color:#6ee7b7;font-weight:700;text-decoration:none;font-size:14px;">← Back to Smartfitao</a>
+                <a id="website-back-link" href="https://fyp-web-code-deployment.vercel.app/" style="display:block;position:absolute;top:16px;left:16px;z-index:200;color:#6ee7b7;font-weight:700;text-decoration:none;font-size:14px;">← Back to Smartfitao</a>
                 <div class="pre-camera-brand">
                     <div class="pre-camera-badge">Smartfitao · Computer Vision</div>
                     <h1 class="pre-camera-title">Body scan studio</h1>
-                    <p class="pre-camera-subbrand">543-point HEAVY AI tracking</p>
+                    <p class="pre-camera-subbrand">BlazePose · 33 body landmarks</p>
                 </div>
                 <div class="pre-camera-features" aria-hidden="true">
                     <span class="pre-camera-feature-pill">33 body landmarks</span>
                     <span class="pre-camera-feature-pill">Live body mask</span>
-                    <span class="pre-camera-feature-pill">A-pose guide</span>
+                    <span class="pre-camera-feature-pill">STAND HERE guide</span>
                 </div>
                 <p id="pre-camera-why" class="pre-camera-why">
-                    We track <strong>543 points</strong> with a <strong>live body mask</strong> on you. Match the <strong>yellow A-pose guide</strong> — when your pose is correct the mask turns <strong>green</strong>.
+                    We track <strong>33 body points</strong> in your browser — no heavy download. Stand in the <strong>STAND HERE</strong> shadow with full body visible.
                 </p>
                 <div class="pre-camera-section" aria-label="Pose guide">
                     <div class="pre-camera-section-title">How to stand — A-pose</div>
@@ -1197,7 +1197,7 @@
                     </ul>
                 </div>
                 <p id="pre-camera-permission" class="pre-camera-permission">
-                    <strong>Tap below</strong> — your browser will ask to <strong>Allow camera</strong>. Then HEAVY AI loads and tracks your body in real time.
+                    <strong>Tap below</strong> — allow camera. BlazePose loads from CDN in a few seconds (works on Vercel &amp; local).
                 </p>
                 <button type="button" class="start-btn" id="start-camera-btn" onclick="window.__smartFitaoStartCamera && window.__smartFitaoStartCamera(event)">Allow camera &amp; start scan</button>
                 <div id="camera-error-box" class="camera-error-box" role="alert" aria-live="assertive">
@@ -1305,8 +1305,8 @@
   "dataset_name": "Smart_Fitao_LivePose_Heavy",
   "schema_version": 2,
   "total_keypoints": 33,
-  "extended_tracking_points": 543,
-  "model_tier": "pose_landmarker_heavy",
+  "extended_tracking_points": 33,
+  "model_tier": "blazepose_classic",
   "min_landmark_visibility": 0.55,
   "height_cm_range": [120, 230],
   "weight_kg_range": [30, 250],
@@ -1545,12 +1545,20 @@
             preCameraScreen.style.display = 'flex';
         }
         (function showWebsiteBackLink() {
-            const back = _sp.get('return');
+            const DEFAULT_RETURN = 'https://fyp-web-code-deployment.vercel.app/';
+            const raw = _sp.get('return') || _sp.get('return_to') || DEFAULT_RETURN;
             const link = document.getElementById('website-back-link');
-            if (link && back && back.startsWith('/')) {
-                link.href = back;
-                link.style.display = 'block';
+            if (!link) return;
+            let href = DEFAULT_RETURN;
+            if (raw) {
+                try {
+                    href = raw.startsWith('http') ? raw : (raw.startsWith('/') ? raw : DEFAULT_RETURN);
+                } catch (e) {
+                    href = DEFAULT_RETURN;
+                }
             }
+            link.href = href;
+            link.style.display = 'block';
         })();
 
         // Keep this fallback block harmless if old UI appears from cache.
@@ -1585,12 +1593,12 @@
 
             if (code === 'POSE_LOAD_FAILED' || name === 'PoseLoadError') {
                 return {
-                    title: 'AI models could not load',
-                    detail: 'Smartfitao needs a quick download for 543-point body tracking.',
+                    title: 'BlazePose could not load',
+                    detail: 'Your browser needs a quick download from our CDN for 33-point body tracking.',
                     steps: [
                         'Check your internet connection.',
                         'Refresh this page and tap Allow camera again.',
-                        'If it still fails, try Chrome or Edge (latest version).'
+                        'Use Chrome or Edge (latest version).'
                     ]
                 };
             }
@@ -2206,34 +2214,33 @@
         async function ensurePoseReady() {
             if (useHeavyTasks && poseLandmarker) return true;
             if (pose && !useHeavyTasks) return true;
+
+            if (useHeavyVisionRequested()) {
+                const heavyOk = await initHeavyVisionModels();
+                if (heavyOk) return true;
+            }
+
             try {
                 await loadClassicMediaPipeScripts();
             } catch (e) {
                 console.warn('Classic MediaPipe scripts:', e);
             }
 
-            /** BlazePose in browser (CDN) — works on Vercel static deploy + local Flask. */
-            if (useFastPosePath() || forceFastPoseOnly()) {
-                initMediaPipeClassic();
-                if (pose) {
-                    useHeavyTasks = false;
-                    _totalTrackingPoints = 33;
-                    if (debugInfo) {
-                        debugInfo.textContent = 'BlazePose · 33 landmarks · A-pose + body beam';
-                    }
-                    updateAiStatus('BlazePose ready — match A-pose in the box', 'ready');
-                    return true;
+            initMediaPipeClassic();
+            if (pose) {
+                useHeavyTasks = false;
+                _totalTrackingPoints = 33;
+                if (debugInfo) {
+                    debugInfo.textContent = 'BlazePose · 33 landmarks';
                 }
-                if (forceFastPoseOnly()) {
-                    throw Object.assign(
-                        new Error('BlazePose did not load. Check internet and refresh.'),
-                        { name: 'PoseLoadError', code: 'POSE_LOAD_FAILED' }
-                    );
-                }
+                updateAiStatus('BlazePose ready — stand in frame', 'ready');
+                return true;
             }
 
-            if (!useHeavyVisionRequested()) return false;
-            return initHeavyVisionModels();
+            throw Object.assign(
+                new Error('BlazePose could not load. Check internet and refresh.'),
+                { name: 'PoseLoadError', code: 'POSE_LOAD_FAILED' }
+            );
         }
 
         function applyPhoneFastUiCopy() {
@@ -2255,24 +2262,15 @@
         }
         applyPhoneFastUiCopy();
 
-        /** Preload lite AI early (Flutter embed, localhost, phone, website iframe). */
-        if (IS_MOBILE_DEVICE || isFlutterEmbedMode() || IS_LOCAL_DEV || isWebsiteEmbedMode()) {
-            updateAiStatus(useFastPosePath() ? 'Preparing fast body AI…' : 'Preparing body scan AI…', 'loading');
-            if (useFastPosePath()) {
-                loadClassicMediaPipeScripts()
-                    .then(function () {
-                        initMediaPipeClassic();
-                        if (pose) updateAiStatus('AI ready — tap Allow camera to start', 'ready');
-                    })
-                    .catch(function () { updateAiStatus('', ''); });
-            } else {
-                ensurePoseReady()
-                    .then(function (ok) {
-                        if (ok) updateAiStatus('AI ready — tap Allow camera to start', 'ready');
-                    })
-                    .catch(function () { updateAiStatus('', ''); });
-            }
-        }
+        /** Preload BlazePose early (CDN — no 543-pt heavy download). */
+        updateAiStatus('Preparing BlazePose…', 'loading');
+        loadClassicMediaPipeScripts()
+            .then(function () {
+                initMediaPipeClassic();
+                if (pose) updateAiStatus('AI ready — tap Allow camera to start', 'ready');
+                else updateAiStatus('', '');
+            })
+            .catch(function () { updateAiStatus('', ''); });
 
         async function startCameraFlow() {
             if (_cameraFlowBusy) return;
