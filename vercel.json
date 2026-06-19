@@ -1,5 +1,7 @@
 {
   "buildCommand": "npm run build",
+  "installCommand": "npm install || true",
+  "framework": null,
   "rewrites": [
     { "source": "/analyze", "destination": "/api/analyze" }
   ],
@@ -11,5 +13,10 @@
         { "key": "Access-Control-Allow-Origin", "value": "*" }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/analyze.js": {
+      "maxDuration": 10
+    }
+  }
 }

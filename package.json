@@ -2,8 +2,9 @@
   "name": "computer-vision-work",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "BlazePose body scan — browser AI + Vercel serverless API",
   "scripts": {
-    "build": "node -e \"require('fs').copyFileSync('templates/index.html','index.html')\""
+    "build": "node build.cjs"
   }
 }

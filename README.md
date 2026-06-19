@@ -35,6 +35,8 @@ python app.py
 
 Open http://127.0.0.1:5000/
 
+> **Vercel note:** Python/Flask files are excluded via `.vercelignore`. Production uses browser MediaPipe + `/api/analyze` only (small bundle, no 450MB install).
+
 ## How it works
 
 | Layer | Local | Vercel |

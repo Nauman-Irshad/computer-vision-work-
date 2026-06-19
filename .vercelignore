@@ -1,0 +1,9 @@
+# Local Flask/Python only — Vercel uses browser AI + api/analyze.js
+requirements.txt
+app.py
+python_backend/
+docs/
+images/
+*.bat
+*.tex
+*.code-workspace
