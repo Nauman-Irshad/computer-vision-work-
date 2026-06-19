@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm run build",
+  "rewrites": [
+    { "source": "/analyze", "destination": "/api/analyze" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Permissions-Policy", "value": "camera=(self)" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    }
+  ]
+}

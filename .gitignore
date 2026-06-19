@@ -1,0 +1,27 @@
+# Local captures
+images/
+*.jpg
+*.jpeg
+*.png
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+
+# Vercel / Node
+.vercel/
+node_modules/
+
+# IDE
+.vscode/
+*.code-workspace
+
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
